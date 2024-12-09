@@ -66,6 +66,7 @@ app.post('/api/v1/register', async (req, res) => {
   await prisma.user
     .create({
       select: {
+        id: true,
         email: true,
         username: true,
       },
@@ -92,6 +93,35 @@ app.post('/api/v1/register', async (req, res) => {
       res.status(500).json({ isSuccess: false, message: '不明なエラーが発生しました' })
     });
 });
+
+
+
+app.post('/api/v1/user-update',async(req, res) => {
+  const {username, email, password} = req.body;
+  const date = {};
+  if (username) {
+    date.username = username;
+  }
+  if (email) {
+    date.email = email;
+  }
+  if (password) {
+    date.password = hashSync(password, 10);
+  }
+  await prisma.user.update({
+    where: {
+      id: req.session.user.id
+    },
+    date: date,
+  })
+    .then(result => {
+      res.json({ isSuccess: true, message: '保存成功しました' });
+    })
+    .catch(error =>{
+      res.json({ isSuccess: false, message: '保存失敗しました' });
+    })
+})
+0
 
 // ログアウト処理
 app.get('/api/v1/logout', async (req, res) => {
